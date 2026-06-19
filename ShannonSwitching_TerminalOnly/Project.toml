@@ -1,0 +1,7 @@
+name = "ShannonSwitching"
+uuid = "d5b9f2d0-1cf9-4e2f-a68f-000000000001"
+version = "0.1.0"
+authors = ["Your Team"]
+
+[deps]
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
