@@ -70,3 +70,73 @@ function random_graph(n::Int, m::Int; weighted::Bool=false)::GameGraph
     end
     return GameGraph(v, edges, v[1], v[n])
 end
+
+"""
+    playable_random_graph(n::Int, m::Int; weighted=false)::GameGraph
+
+Generate a connected graph that is better suited for playing Shannon-Switching.
+
+Unlike `random_graph`, this function first creates two different s-t paths
+and then adds random edges. This avoids demonstration graphs where Cut can
+usually win immediately by deleting a single bridge edge.
+
+The source is vertex 1 and the target is vertex n.
+"""
+function playable_random_graph(n::Int, m::Int; weighted=false)::GameGraph
+    @assert n >= 4 "playable_random_graph needs at least 4 vertices."
+    @assert m >= n "For a playable graph with two s-t paths, use m >= n."
+    @assert m <= n * (n - 1) ÷ 2 "Too many edges for a simple graph."
+
+    vertices = [Vertex(i) for i in 1:n]
+
+    pairs = Tuple{Int, Int}[]
+    seen = Set{Tuple{Int, Int}}()
+
+    function add_pair!(a::Int, b::Int)
+        a == b && return false
+
+        u, v = min(a, b), max(a, b)
+        pair = (u, v)
+
+        if pair in seen
+            return false
+        end
+
+        push!(seen, pair)
+        push!(pairs, pair)
+        return true
+    end
+
+    # Build two different s-t paths.
+    # Example for n = 8:
+    # path1: 1 - 2 - 3 - 4 - 8
+    # path2: 1 - 5 - 6 - 7 - 8
+    split = n ÷ 2
+
+    path1 = [1; collect(2:split); n]
+    path2 = [1; collect((split + 1):(n - 1)); n]
+
+    for i in 1:(length(path1) - 1)
+        add_pair!(path1[i], path1[i + 1])
+    end
+
+    for i in 1:(length(path2) - 1)
+        add_pair!(path2[i], path2[i + 1])
+    end
+
+    # Add extra random edges until the graph has m edges.
+    while length(pairs) < m
+        a = rand(1:n)
+        b = rand(1:n)
+        add_pair!(a, b)
+    end
+
+    edges = Edge[]
+
+    for (id, (u, v)) in enumerate(pairs)
+        weight = weighted ? Float64(rand(1:10)) : 0.0
+        push!(edges, Edge(id, vertices[u], vertices[v], weight, :neutral))
+    end
+
+    return GameGraph(vertices, edges, vertices[1], vertices[n])
+end

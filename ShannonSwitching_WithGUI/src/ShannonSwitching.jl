@@ -8,7 +8,7 @@ include("terminal.jl")
 
 export Vertex, Edge, GameGraph, GameState
 export new_game, valid_moves, make_move!, check_winner
-export sample_graph, random_graph
+export sample_graph, random_graph, playable_random_graph
 export has_st_path, find_st_path, shortest_st_path, path_weight
 export random_strategy, short_strategy, cut_strategy
 export weighted_short, weighted_cut, TEAM_NAME
